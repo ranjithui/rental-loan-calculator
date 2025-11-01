@@ -49,9 +49,9 @@ def loan_clearance_schedule(property_value, down_payment_pct, interest_rate, ten
     return loan_amount, round(emi, 2), round(monthly_rent, 2), round(years_taken, 2), annual_rental_income, total_interest, df_schedule
 
 # ===============================
-# Function: Project Property Value for 10 Years with Annual Increase %
+# Function: Project Property Value for 15 Years with Annual Increase %
 # ===============================
-def project_property_value_list(current_value, annual_increase_pct, years=10):
+def project_property_value_list(current_value, annual_increase_pct, years=15):
     projection = []
     value = current_value
     for year in range(1, years + 1):
@@ -156,14 +156,23 @@ st.info(f"Suggested Rental ROI: {segment_roi}%")
 annual_increase = property_value_increase.get(selected_segment, 5)  # default 5%
 st.info(f"💡 Estimated Annual Property Value Increase: {annual_increase}% (based on recent Dubai market trends)")
 
-# Project property value for 10 years with annual increase %
-df_projection_list = project_property_value_list(suggested_price, annual_increase, years=10)
-st.markdown("<h3 style='color:#1F4E79;'>📊 10-Year Projected Property Value List</h3>", unsafe_allow_html=True)
-st.dataframe(df_projection_list.style.format({
+# Project property value for 15 years with annual increase %
+df_projection_list = project_property_value_list(suggested_price, annual_increase, years=15)
+
+st.markdown("<h3 style='color:#1F4E79;'>📊 15-Year Projected Property Value List</h3>", unsafe_allow_html=True)
+
+# Style the dataframe for a more attractive look
+styled_df = df_projection_list.style.format({
     "Projected Value": f"{currency_symbol}" + "{:,.0f}",
     "Annual Increase %": "{:.1f}%"
-}))
-st.line_chart(df_projection_list.set_index("Year")["Projected Value"])
+}).set_table_styles([
+    {"selector": "th", "props": [("background-color", "#1F4E79"), ("color", "white"), ("text-align", "center")]},
+    {"selector": "td", "props": [("text-align", "center")]},
+    {"selector": "tr:nth-child(even)", "props": [("background-color", "#F0F8FF")]},
+    {"selector": "tr:nth-child(odd)", "props": [("background-color", "#FFFFFF")]}
+])
+
+st.dataframe(styled_df)
 
 # ===============================
 # Property Segments – Cards Layout
@@ -232,7 +241,6 @@ if st.button("Calculate"):
                 "Remaining Balance": f"{currency_symbol}" + "{:,.0f}",
                 "Annual Rental Yield": f"{currency_symbol}" + "{:,.0f}"
             }))
-            st.line_chart(df_schedule.set_index("Year")["Remaining Balance"])
     else:
         # Full Payment mode: yearly and monthly rental
         annual_rental_income = property_value * rental_roi / 100

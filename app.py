@@ -49,13 +49,18 @@ def loan_clearance_schedule(property_value, down_payment_pct, interest_rate, ten
     return loan_amount, round(emi, 2), round(monthly_rent, 2), round(years_taken, 2), annual_rental_income, total_interest, df_schedule
 
 # ===============================
-# Function: Project Property Value for 10 Years
+# Function: Project Property Value for 10 Years with Annual Increase %
 # ===============================
-def project_property_value(current_value, annual_increase_pct, years=10):
+def project_property_value_list(current_value, annual_increase_pct, years=10):
     projection = []
+    value = current_value
     for year in range(1, years + 1):
-        current_value *= (1 + annual_increase_pct / 100)
-        projection.append({"Year": year, "Projected Value": current_value})
+        value = value * (1 + annual_increase_pct / 100)
+        projection.append({
+            "Year": year,
+            "Projected Value": value,
+            "Annual Increase %": annual_increase_pct
+        })
     return pd.DataFrame(projection)
 
 # ===============================
@@ -151,11 +156,14 @@ st.info(f"Suggested Rental ROI: {segment_roi}%")
 annual_increase = property_value_increase.get(selected_segment, 5)  # default 5%
 st.info(f"💡 Estimated Annual Property Value Increase: {annual_increase}% (based on recent Dubai market trends)")
 
-# Project property value for 10 years
-df_projection = project_property_value(suggested_price, annual_increase, years=10)
-st.markdown("<h3 style='color:#1F4E79;'>📊 Projected Property Value Over 10 Years</h3>", unsafe_allow_html=True)
-st.dataframe(df_projection.style.format({"Projected Value": f"{currency_symbol}" + "{:,.0f}"}))
-st.line_chart(df_projection.set_index("Year")["Projected Value"])
+# Project property value for 10 years with annual increase %
+df_projection_list = project_property_value_list(suggested_price, annual_increase, years=10)
+st.markdown("<h3 style='color:#1F4E79;'>📊 10-Year Projected Property Value List</h3>", unsafe_allow_html=True)
+st.dataframe(df_projection_list.style.format({
+    "Projected Value": f"{currency_symbol}" + "{:,.0f}",
+    "Annual Increase %": "{:.1f}%"
+}))
+st.line_chart(df_projection_list.set_index("Year")["Projected Value"])
 
 # ===============================
 # Property Segments – Cards Layout

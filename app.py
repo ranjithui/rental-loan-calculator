@@ -150,7 +150,12 @@ segment_roi = property_segments[selected_segment]["roi"]
 annual_increase = property_value_increase.get(selected_segment, 5)
 suggested_price = segment_price_usd * conversion_rates[calc_currency]
 
+# Display Suggested Values
 st.info(f"Suggested Property Value: {currency_symbol}{suggested_price:,.0f} ({currency_choice_label})")
+st.markdown(
+    "<p style='color:#6c757d; font-size:0.85rem;'>💡 Note: The property value mentioned is approximate and may vary based on location, market trends, and other factors.</p>",
+    unsafe_allow_html=True
+)
 st.info(f"Suggested Rental ROI: {segment_roi}%")
 st.info(f"💡 Estimated Annual Property Value Increase: {annual_increase}% (based on Dubai market trends)")
 
@@ -171,6 +176,7 @@ for i, (seg, data) in enumerate(property_segments.items()):
         <div style="border:1px solid #D3D3D3; border-radius:10px; padding:15px; margin:5px; background-color:#F9F9F9;">
             <h4 style='color:#1F4E79;'>{seg}</h4>
             <p style='color:#4B4B4B;'>Price ({currency_choice_label}): {currency_symbol}{price_converted:,.0f}</p>
+            <p style='color:#6c757d; font-size:0.8rem;'>*Approx. value, may vary by location & market trends</p>
             <p style='color:#4B4B4B;'>Typical ROI: {roi:.1f}%</p>
             <p style='color:#4B4B4B;'>Annual Property Increase: {annual_inc:.1f}%</p>
         </div>
@@ -247,3 +253,12 @@ if st.button("Calculate"):
         st.metric("Yearly Rental Income", f"{currency_symbol}{annual_rental_income:,.0f}")
         st.metric("Monthly Rental Income", f"{currency_symbol}{monthly_rental_income:,.0f}")
         st.metric("ROI (%)", f"{rental_roi:.2f}%")
+
+# ===============================
+# Global Disclaimer
+# ===============================
+st.markdown("<hr style='border:1px solid #D3D3D3'>", unsafe_allow_html=True)
+st.markdown(
+    "<p style='color:#6c757d; font-size:0.85rem; text-align:center;'>⚠️ Disclaimer: All property values, ROI, and projections are indicative and approximate. Actual values may vary depending on location, market conditions, and other factors.</p>",
+    unsafe_allow_html=True
+)

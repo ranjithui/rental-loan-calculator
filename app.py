@@ -46,12 +46,27 @@ def loan_clearance_schedule(property_value, down_payment_pct, interest_rate, ten
 
     return loan_amount, round(emi, 2), round(monthly_rent, 2), round(years_taken, 2), annual_rental_income, total_interest, df_schedule
 
+# ===============================
+# Property Segments Data
+# ===============================
+property_segments = {
+    "Studio / Entry-level Apartment": {"price": 137500, "roi": 9},
+    "1-Bedroom Apartment": {"price": 205000, "roi": 7.75},
+    "2-Bedroom Apartment": {"price": 297500, "roi": 7},
+    "Townhouse / Mid-segment Villa": {"price": 1020000, "roi": 5},
+    "Premium / Luxury Villa": {"price": 2000000, "roi": 5}
+}
 
 # ===============================
 # Streamlit UI
 # ===============================
 st.set_page_config(page_title="Global Rental Loan Clearance Calculator", page_icon="🏢", layout="centered")
 st.title("🏢 Global Rental Income Loan Clearance Calculator")
+
+st.markdown("""
+Welcome! Use this calculator to estimate **loan clearance with rental income** for Dubai property segments.  
+You can also explore average prices and typical ROI for different property types.
+""")
 
 # --- Currency selector ---
 currency_map = {
@@ -64,15 +79,34 @@ currency_map = {
 currency_choice = st.selectbox("Select Currency", list(currency_map.keys()))
 currency_symbol = currency_map[currency_choice]
 
+# --- Property Segment Table ---
+st.subheader("🏘️ Dubai Property Segments Overview")
+df_segments = pd.DataFrame(property_segments).T.reset_index()
+df_segments.columns = ["Property Type", "Average Price (USD)", "Typical Gross ROI (%)"]
+st.dataframe(df_segments.style.format({
+    "Average Price (USD)": "${:,.0f}",
+    "Typical Gross ROI (%)": "{:.1f}%"
+}))
+
+# --- Auto-fill Inputs from Segment ---
+st.subheader("💡 Select Property Segment to Auto-Fill Values")
+selected_segment = st.selectbox("Select Property Segment", list(property_segments.keys()))
+if selected_segment:
+    segment_price = property_segments[selected_segment]["price"]
+    segment_roi = property_segments[selected_segment]["roi"]
+    st.info(f"Suggested Property Value: ${segment_price:,}")
+    st.info(f"Suggested Rental ROI: {segment_roi}%")
+
 # --- Inputs ---
+st.subheader("🏦 Loan and Investment Inputs")
 col1, col2 = st.columns(2)
 with col1:
-    property_value = st.number_input(f"Property Value ({currency_symbol})", value=5_00_000, step=10_000)
+    property_value = st.number_input(f"Property Value ({currency_symbol})", value=segment_price, step=10_000)
     down_payment_pct = st.slider("Down Payment %", 0, 100, 25)
     interest_rate = st.number_input("Home Loan Interest Rate (%)", value=4.0, step=0.1)
 with col2:
     tenure_years = st.number_input("Loan Tenure (Years)", value=25, step=1)
-    rental_roi = st.number_input("Rental ROI (%)", value=6.0, step=0.1)
+    rental_roi = st.number_input("Rental ROI (%)", value=segment_roi, step=0.1)
 
 # --- Calculate Button ---
 if st.button("Calculate"):
@@ -98,4 +132,3 @@ if st.button("Calculate"):
     }))
 
     st.line_chart(df_schedule.set_index("Year")["Remaining Balance"])
-

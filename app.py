@@ -74,7 +74,7 @@ logo_path = "logo.png"  # Replace with your actual logo path
 st.markdown(
     f"""
     <div style="text-align: center;">
-        <img src="{logo_path}" width="250">
+        <img src="{logo_path}" width="150">
     </div>
     """,
     unsafe_allow_html=True

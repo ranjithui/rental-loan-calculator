@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from PIL import Image
 
 # ===============================
 # Function: Loan Clearance Model
@@ -70,9 +69,16 @@ conversion_rates = get_conversion_rates()
 # ===============================
 st.set_page_config(page_title="Dubai Rental Loan Calculator", page_icon="🏢", layout="wide")
 
-# --- Logo ---
-logo = Image.open("logo.png")  # Replace with your logo file
-st.image(logo, width=150)
+# --- Centered Bigger Logo ---
+logo_path = "logo.png"  # Replace with your actual logo path
+st.markdown(
+    f"""
+    <div style="text-align: center;">
+        <img src="{logo_path}" width="250">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # --- Page Title ---
 st.markdown("<h1 style='text-align:center; color:#0A81AB;'>🏢 Dubai Property Rental & Loan Calculator</h1>", unsafe_allow_html=True)

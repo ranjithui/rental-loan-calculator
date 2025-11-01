@@ -99,7 +99,7 @@ conversion_rates = get_conversion_rates()
 st.set_page_config(page_title="Dubai Rental Loan Calculator", page_icon="🏢", layout="wide")
 
 # ===============================
-# Step 1: Header with Centered Logo or Fallback Heading
+# Header with Centered Logo
 # ===============================
 logo_path = "logo.png"  # Replace with your actual logo path
 
@@ -131,10 +131,10 @@ st.markdown(
 st.markdown("<hr style='border:1px solid #D3D3D3'>", unsafe_allow_html=True)
 
 # ===============================
-# Step 2: Select Property Segment & Currency
+# Step 1: Select Property Segment & Currency
 # ===============================
 st.markdown("<h2 style='color:#1F4E79;'>Step 1: Select Property Segment & Currency</h2>", unsafe_allow_html=True)
-st.markdown("<p style='color:#4B4B4B;'>Select a property segment to auto-fill suggested values for property price and rental ROI, and choose your preferred currency.</p>", unsafe_allow_html=True)
+st.markdown("<p style='color:#4B4B4B;'>Select a property segment to auto-fill suggested values for property price, rental ROI, and annual property value increase.</p>", unsafe_allow_html=True)
 
 # Currency Selection
 currency_map = {"INR (₹)": "INR", "USD ($)": "USD", "GBP (£)": "GBP", "EUR (€)": "EUR", "AUD (A$)": "AUD"}
@@ -147,21 +147,41 @@ currency_symbol = currency_symbol_map[calc_currency]
 selected_segment = st.selectbox("Select Property Segment", list(property_segments.keys()))
 segment_price_usd = property_segments[selected_segment]["price_usd"]
 segment_roi = property_segments[selected_segment]["roi"]
+annual_increase = property_value_increase.get(selected_segment, 5)
 suggested_price = segment_price_usd * conversion_rates[calc_currency]
 
 st.info(f"Suggested Property Value: {currency_symbol}{suggested_price:,.0f} ({currency_choice_label})")
 st.info(f"Suggested Rental ROI: {segment_roi}%")
+st.info(f"💡 Estimated Annual Property Value Increase: {annual_increase}% (based on Dubai market trends)")
 
-# Display estimated annual property increase
-annual_increase = property_value_increase.get(selected_segment, 5)  # default 5%
-st.info(f"💡 Estimated Annual Property Value Increase: {annual_increase}% (based on recent Dubai market trends)")
+# ===============================
+# Property Segments – Cards Layout with Annual Increase
+# ===============================
+st.markdown("<h3 style='color:#1F4E79;'>Property Segments – Multi-Currency Prices, ROI & Annual Increase</h3>", unsafe_allow_html=True)
+st.markdown("<p style='color:#4B4B4B;'>Explore Dubai property segments with approximate prices, rental yield, and annual property value increase.</p>", unsafe_allow_html=True)
 
-# Project property value for 15 years with annual increase %
+cols = st.columns(3)  # 3 cards per row
+for i, (seg, data) in enumerate(property_segments.items()):
+    col = cols[i % 3]
+    price_converted = data["price_usd"] * conversion_rates[calc_currency]
+    roi = data["roi"]
+    annual_inc = property_value_increase.get(seg, 5)
+    with col:
+        st.markdown(f"""
+        <div style="border:1px solid #D3D3D3; border-radius:10px; padding:15px; margin:5px; background-color:#F9F9F9;">
+            <h4 style='color:#1F4E79;'>{seg}</h4>
+            <p style='color:#4B4B4B;'>Price ({currency_choice_label}): {currency_symbol}{price_converted:,.0f}</p>
+            <p style='color:#4B4B4B;'>Typical ROI: {roi:.1f}%</p>
+            <p style='color:#4B4B4B;'>Annual Property Increase: {annual_inc:.1f}%</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ===============================
+# 15-Year Projected Property Value List
+# ===============================
 df_projection_list = project_property_value_list(suggested_price, annual_increase, years=15)
-
 st.markdown("<h3 style='color:#1F4E79;'>📊 15-Year Projected Property Value List</h3>", unsafe_allow_html=True)
 
-# Style the dataframe for a more attractive look
 styled_df = df_projection_list.style.format({
     "Projected Value": f"{currency_symbol}" + "{:,.0f}",
     "Annual Increase %": "{:.1f}%"
@@ -175,35 +195,13 @@ styled_df = df_projection_list.style.format({
 st.dataframe(styled_df)
 
 # ===============================
-# Property Segments – Cards Layout
-# ===============================
-st.markdown("<h3 style='color:#1F4E79;'>Property Segments – Multi-Currency Prices & ROI</h3>", unsafe_allow_html=True)
-st.markdown("<p style='color:#4B4B4B;'>Explore Dubai property segments with approximate prices and rental yield. Click each card to see details.</p>", unsafe_allow_html=True)
-
-cols = st.columns(3)  # 3 cards per row
-for i, (seg, data) in enumerate(property_segments.items()):
-    col = cols[i % 3]
-    price_converted = data["price_usd"] * conversion_rates[calc_currency]
-    roi = data["roi"]
-    with col:
-        st.markdown(f"""
-        <div style="border:1px solid #D3D3D3; border-radius:10px; padding:15px; margin:5px; background-color:#F9F9F9;">
-            <h4 style='color:#1F4E79;'>{seg}</h4>
-            <p style='color:#4B4B4B;'>Price ({currency_choice_label}): {currency_symbol}{price_converted:,.0f}</p>
-            <p style='color:#4B4B4B;'>Typical ROI: {roi:.1f}%</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-# ===============================
 # Step 2: Payment Option & Inputs
 # ===============================
 st.markdown("<h2 style='color:#1F4E79;'>Step 2: Choose Payment Option & Enter Inputs</h2>", unsafe_allow_html=True)
 st.markdown("<p style='color:#4B4B4B;'>Select whether you want to take a loan or pay the full amount, and provide required input values.</p>", unsafe_allow_html=True)
 
-# Payment Option
 loan_option = st.radio("Do you plan to take a loan?", ("Yes, use loan", "No, pay full amount"))
 
-# Input fields
 if loan_option == "Yes, use loan":
     col1, col2 = st.columns(2)
     with col1:
@@ -242,7 +240,6 @@ if st.button("Calculate"):
                 "Annual Rental Yield": f"{currency_symbol}" + "{:,.0f}"
             }))
     else:
-        # Full Payment mode: yearly and monthly rental
         annual_rental_income = property_value * rental_roi / 100
         monthly_rental_income = annual_rental_income / 12
         st.markdown("<h3 style='color:#1F4E79;'>Full Payment Summary</h3>", unsafe_allow_html=True)

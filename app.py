@@ -109,30 +109,25 @@ suggested_price = segment_price_usd * conversion_rates[calc_currency]
 st.info(f"Suggested Property Value: {currency_symbol}{suggested_price:,.0f} ({currency_choice_label})")
 st.info(f"Suggested Rental ROI: {segment_roi}%")
 
-# Property Table
+# ===============================
+# Property Segments – Cards Layout
+# ===============================
 st.markdown("<h3 style='color:#1F4E79;'>Property Segments – Multi-Currency Prices & ROI</h3>", unsafe_allow_html=True)
-rows = []
-for seg, data in property_segments.items():
-    price_usd = data["price_usd"]
+st.markdown("<p style='color:#4B4B4B;'>Explore Dubai property segments with approximate prices and rental yield. Click each card to see details.</p>", unsafe_allow_html=True)
+
+cols = st.columns(3)  # 3 cards per row
+for i, (seg, data) in enumerate(property_segments.items()):
+    col = cols[i % 3]
+    price_converted = data["price_usd"] * conversion_rates[calc_currency]
     roi = data["roi"]
-    rows.append({
-        "Property Type": seg,
-        "Price (USD)": price_usd,
-        "Price (INR)": price_usd * conversion_rates["INR"],
-        "Price (EUR)": price_usd * conversion_rates["EUR"],
-        "Price (GBP)": price_usd * conversion_rates["GBP"],
-        "Price (AUD)": price_usd * conversion_rates["AUD"],
-        "Typical Gross ROI (%)": roi
-    })
-df_segments = pd.DataFrame(rows)
-st.dataframe(df_segments.style.format({
-    "Price (USD)": "${:,.0f}",
-    "Price (INR)": "₹{:,.0f}",
-    "Price (EUR)": "€{:,.0f}",
-    "Price (GBP)": "£{:,.0f}",
-    "Price (AUD)": "A${:,.0f}",
-    "Typical Gross ROI (%)": "{:.1f}%"
-}))
+    with col:
+        st.markdown(f"""
+        <div style="border:1px solid #D3D3D3; border-radius:10px; padding:15px; margin:5px; background-color:#F9F9F9;">
+            <h4 style='color:#1F4E79;'>{seg}</h4>
+            <p style='color:#4B4B4B;'>Price ({currency_choice_label}): {currency_symbol}{price_converted:,.0f}</p>
+            <p style='color:#4B4B4B;'>Typical ROI: {roi:.1f}%</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ===============================
 # Step 2: Payment Option & Inputs
@@ -183,8 +178,11 @@ if st.button("Calculate"):
             }))
             st.line_chart(df_schedule.set_index("Year")["Remaining Balance"])
     else:
+        # Full Payment mode: yearly and monthly rental
         annual_rental_income = property_value * rental_roi / 100
+        monthly_rental_income = annual_rental_income / 12
         st.markdown("<h3 style='color:#1F4E79;'>Full Payment Summary</h3>", unsafe_allow_html=True)
         st.metric("Property Value", f"{currency_symbol}{property_value:,.0f}")
         st.metric("Yearly Rental Income", f"{currency_symbol}{annual_rental_income:,.0f}")
+        st.metric("Monthly Rental Income", f"{currency_symbol}{monthly_rental_income:,.0f}")
         st.metric("ROI (%)", f"{rental_roi:.2f}%")

@@ -49,6 +49,16 @@ def loan_clearance_schedule(property_value, down_payment_pct, interest_rate, ten
     return loan_amount, round(emi, 2), round(monthly_rent, 2), round(years_taken, 2), annual_rental_income, total_interest, df_schedule
 
 # ===============================
+# Function: Project Property Value for 10 Years
+# ===============================
+def project_property_value(current_value, annual_increase_pct, years=10):
+    projection = []
+    for year in range(1, years + 1):
+        current_value *= (1 + annual_increase_pct / 100)
+        projection.append({"Year": year, "Projected Value": current_value})
+    return pd.DataFrame(projection)
+
+# ===============================
 # Property Segments Data
 # ===============================
 property_segments = {
@@ -57,6 +67,17 @@ property_segments = {
     "2‑Bedroom Apartment": {"price_usd": 297500, "roi": 7},
     "Townhouse / Mid‑segment Villa": {"price_usd": 1020000, "roi": 5},
     "Premium / Luxury Villa": {"price_usd": 2000000, "roi": 5}
+}
+
+# ===============================
+# Approximate Annual Property Value Increase
+# ===============================
+property_value_increase = {
+    "Studio / Entry‑level Apartment": 6,
+    "1‑Bedroom Apartment": 8,
+    "2‑Bedroom Apartment": 7,
+    "Townhouse / Mid‑segment Villa": 21,
+    "Premium / Luxury Villa": 25
 }
 
 # ===============================
@@ -125,6 +146,16 @@ suggested_price = segment_price_usd * conversion_rates[calc_currency]
 
 st.info(f"Suggested Property Value: {currency_symbol}{suggested_price:,.0f} ({currency_choice_label})")
 st.info(f"Suggested Rental ROI: {segment_roi}%")
+
+# Display estimated annual property increase
+annual_increase = property_value_increase.get(selected_segment, 5)  # default 5%
+st.info(f"💡 Estimated Annual Property Value Increase: {annual_increase}% (based on recent Dubai market trends)")
+
+# Project property value for 10 years
+df_projection = project_property_value(suggested_price, annual_increase, years=10)
+st.markdown("<h3 style='color:#1F4E79;'>📊 Projected Property Value Over 10 Years</h3>", unsafe_allow_html=True)
+st.dataframe(df_projection.style.format({"Projected Value": f"{currency_symbol}" + "{:,.0f}"}))
+st.line_chart(df_projection.set_index("Year")["Projected Value"])
 
 # ===============================
 # Property Segments – Cards Layout

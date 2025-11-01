@@ -69,8 +69,8 @@ conversion_rates = get_conversion_rates()
 # ===============================
 st.set_page_config(page_title="Dubai Rental Loan Calculator", page_icon="🏢", layout="wide")
 
-# --- Centered Corporate Logo ---
-logo_path = "logo.png"  # Replace with your logo path
+# --- Header with Centered Logo ---
+logo_path = "logo.png"  # Replace with your logo file path
 st.markdown(
     f"""
     <div style="text-align: center; margin-bottom:20px;">
@@ -79,12 +79,11 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-# --- Page Title ---
 st.markdown(
     "<h1 style='text-align:center; color:#1F4E79; font-family:Arial;'>Dubai Property Rental & Loan Calculator</h1>",
     unsafe_allow_html=True
 )
+st.markdown("<p style='text-align:center; color:#4B4B4B;'>Make informed investment decisions with multi-currency insights and rental ROI projections</p>", unsafe_allow_html=True)
 st.markdown("<hr style='border:1px solid #D3D3D3'>", unsafe_allow_html=True)
 
 # --- Currency Selection ---
@@ -96,6 +95,7 @@ currency_symbol = currency_symbol_map[calc_currency]
 
 # --- Property Segment Table ---
 st.markdown("<h2 style='color:#1F4E79;'>Property Segments – Multi-Currency Prices & ROI</h2>", unsafe_allow_html=True)
+st.markdown("<p style='color:#4B4B4B;'>Explore Dubai’s property segments with approximate prices in multiple currencies and typical rental yields. Use this to compare ROI before investing.</p>", unsafe_allow_html=True)
 rows = []
 for seg, data in property_segments.items():
     price_usd = data["price_usd"]
@@ -121,10 +121,12 @@ st.dataframe(df_segments.style.format({
 
 # --- Payment Option ---
 st.markdown("<h2 style='color:#1F4E79;'>Payment Option</h2>", unsafe_allow_html=True)
+st.markdown("<p style='color:#4B4B4B;'>Choose your payment method. Calculate expected monthly EMI if using a loan, or total ROI if paying upfront.</p>", unsafe_allow_html=True)
 loan_option = st.radio("Do you plan to take a loan?", ("Yes, use loan", "No, pay full amount"))
 
 # --- Auto-Fill Inputs ---
 st.markdown("<h2 style='color:#1F4E79;'>Select Property Segment</h2>", unsafe_allow_html=True)
+st.markdown("<p style='color:#4B4B4B;'>Select a property segment to auto-fill suggested values for property price and rental ROI.</p>", unsafe_allow_html=True)
 selected_segment = st.selectbox("Select Property Segment", list(property_segments.keys()))
 segment_price_usd = property_segments[selected_segment]["price_usd"]
 segment_roi = property_segments[selected_segment]["roi"]
@@ -135,6 +137,8 @@ st.info(f"Suggested Rental ROI: {segment_roi}%")
 
 # --- Inputs ---
 st.markdown("<h2 style='color:#1F4E79;'>Loan & Investment Inputs</h2>", unsafe_allow_html=True)
+st.markdown("<p style='color:#4B4B4B;'>Adjust property value, down payment, interest rate, tenure, and rental ROI as needed.</p>", unsafe_allow_html=True)
+
 if loan_option == "Yes, use loan":
     col1, col2 = st.columns(2)
     with col1:
@@ -156,19 +160,20 @@ if st.button("Calculate"):
         )
 
         # Loan Summary
-        with st.container():
-            st.markdown("<h3 style='color:#1F4E79;'>Loan Summary</h3>", unsafe_allow_html=True)
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Loan Amount", f"{currency_symbol}{loan_amount:,.0f}")
-            c2.metric("Monthly EMI", f"{currency_symbol}{emi:,.0f}")
-            c3.metric("Monthly Rent", f"{currency_symbol}{monthly_rent:,.0f}")
-            c4, c5, c6 = st.columns(3)
-            c4.metric("Yearly Rental Yield", f"{currency_symbol}{annual_rental_income:,.0f}")
-            c5.metric("Total Interest Paid", f"{currency_symbol}{total_interest:,.0f}")
-            c6.metric("Loan Cleared In", f"{years_taken:.1f} years")
+        st.markdown("<h3 style='color:#1F4E79;'>Loan Summary</h3>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#4B4B4B;'>View a summary of your loan investment. Metrics show total interest, EMI, monthly rent, and expected ROI.</p>", unsafe_allow_html=True)
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Loan Amount", f"{currency_symbol}{loan_amount:,.0f}")
+        c2.metric("Monthly EMI", f"{currency_symbol}{emi:,.0f}")
+        c3.metric("Monthly Rent", f"{currency_symbol}{monthly_rent:,.0f}")
+        c4, c5, c6 = st.columns(3)
+        c4.metric("Yearly Rental Yield", f"{currency_symbol}{annual_rental_income:,.0f}")
+        c5.metric("Total Interest Paid", f"{currency_symbol}{total_interest:,.0f}")
+        c6.metric("Loan Cleared In", f"{years_taken:.1f} years")
 
         # Yearly Balance Chart
         with st.expander("Yearly Loan Balance Overview"):
+            st.markdown("<p style='color:#4B4B4B;'>Yearly loan balance overview helps you understand principal reduction and rental yield impact over time.</p>", unsafe_allow_html=True)
             st.dataframe(df_schedule.style.format({
                 "Remaining Balance": f"{currency_symbol}" + "{:,.0f}",
                 "Annual Rental Yield": f"{currency_symbol}" + "{:,.0f}"
@@ -177,8 +182,8 @@ if st.button("Calculate"):
     else:
         # Full Payment ROI
         annual_rental_income = property_value * rental_roi / 100
-        with st.container():
-            st.markdown("<h3 style='color:#1F4E79;'>Full Payment Summary</h3>", unsafe_allow_html=True)
-            st.metric("Property Value", f"{currency_symbol}{property_value:,.0f}")
-            st.metric("Yearly Rental Income", f"{currency_symbol}{annual_rental_income:,.0f}")
-            st.metric("ROI (%)", f"{rental_roi:.2f}%")
+        st.markdown("<h3 style='color:#1F4E79;'>Full Payment Summary</h3>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#4B4B4B;'>View your investment summary if paying the full amount upfront. Expected ROI is calculated based on rental income.</p>", unsafe_allow_html=True)
+        st.metric("Property Value", f"{currency_symbol}{property_value:,.0f}")
+        st.metric("Yearly Rental Income", f"{currency_symbol}{annual_rental_income:,.0f}")
+        st.metric("ROI (%)", f"{rental_roi:.2f}%")

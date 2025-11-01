@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
+import os
+import base64
 
 # ===============================
 # Function: Loan Clearance Model
@@ -71,16 +73,31 @@ conversion_rates = get_conversion_rates()
 st.set_page_config(page_title="Dubai Rental Loan Calculator", page_icon="🏢", layout="wide")
 
 # ===============================
-# Step 1: Header with Centered Logo
+# Step 1: Header with Centered Logo or Fallback Heading
 # ===============================
 logo_path = "logo.png"  # Replace with your actual logo path
-logo = Image.open(logo_path)
-st.image(logo, width=150, use_column_width=False)  # normal size, centered
 
-st.markdown(
-    "<h1 style='text-align:center; color:#1F4E79; font-family:Arial;'>Dubai Property Rental & Loan Calculator</h1>",
-    unsafe_allow_html=True
-)
+if os.path.exists(logo_path):
+    def get_base64_of_bin_file(bin_file):
+        with open(bin_file, 'rb') as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+
+    logo_base64 = get_base64_of_bin_file(logo_path)
+    st.markdown(
+        f"""
+        <div style="text-align:center; margin-bottom:10px;">
+            <img src="data:image/png;base64,{logo_base64}" width="150">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+else:
+    st.markdown(
+        "<h1 style='text-align:center; color:#1F4E79; font-family:Arial;'>Dubai Property Rental & Loan Calculator</h1>",
+        unsafe_allow_html=True
+    )
+
 st.markdown(
     "<p style='text-align:center; color:#4B4B4B;'>Make informed investment decisions with multi-currency insights and rental ROI projections</p>",
     unsafe_allow_html=True

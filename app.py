@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from PIL import Image
 
 # ===============================
 # Function: Loan Clearance Model
@@ -69,22 +70,30 @@ conversion_rates = get_conversion_rates()
 # ===============================
 st.set_page_config(page_title="Dubai Rental Loan Calculator", page_icon="🏢", layout="wide")
 
-# --- Header with Centered Logo ---
-logo_path = "logo.png"  # Replace with your logo file path
-st.markdown(
-    f"""
-    <div style="text-align: center; margin-bottom:20px;">
-        <img src="{logo_path}" width="150">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# --- Header with Visible, Centered Logo ---
+logo_path = "logo.png"  # Replace with your actual logo path
+logo = Image.open(logo_path)
+st.image(logo, width=150, use_column_width=False)  # normal size, centered
+
 st.markdown(
     "<h1 style='text-align:center; color:#1F4E79; font-family:Arial;'>Dubai Property Rental & Loan Calculator</h1>",
     unsafe_allow_html=True
 )
-st.markdown("<p style='text-align:center; color:#4B4B4B;'>Make informed investment decisions with multi-currency insights and rental ROI projections</p>", unsafe_allow_html=True)
+st.markdown(
+    "<p style='text-align:center; color:#4B4B4B;'>Make informed investment decisions with multi-currency insights and rental ROI projections</p>",
+    unsafe_allow_html=True
+)
 st.markdown("<hr style='border:1px solid #D3D3D3'>", unsafe_allow_html=True)
+
+# --- Step-by-Step Guide ---
+st.markdown("<h2 style='color:#1F4E79;'>📋 How to Use This Calculator</h2>", unsafe_allow_html=True)
+st.markdown("""
+1. **Select a property segment** to see suggested price and ROI.
+2. **Choose a payment option**: loan or full payment.
+3. **Adjust inputs** (property value, down payment, interest rate, tenure, rental ROI).
+4. **Click 'Calculate'** to view loan summary or ROI summary.
+5. **Check charts** for yearly loan balance (if using a loan).
+""", unsafe_allow_html=True)
 
 # --- Currency Selection ---
 currency_map = {"INR (₹)": "INR", "USD ($)": "USD", "GBP (£)": "GBP", "EUR (€)": "EUR", "AUD (A$)": "AUD"}
